@@ -1,3 +1,4 @@
+from os import WCOREDUMP
 from typing import List
 from dataclasses import dataclass
 import itertools
@@ -40,7 +41,21 @@ def is_word(
 
 
 def is_x_mas(grid: Grid, pos: V2) -> bool:
-    return is_char(grid, pos, "A") and (is_char(grid, pos + V2(-1, -1), "X"))
+    ul = pos + V2(-1, -1)
+    bl = pos + V2(-1, 1)
+    ur = pos + V2(1, -1)
+    br = pos + V2(1, 1)
+    return (
+        is_char(grid, pos, "A")
+        and (
+            (is_char(grid, ul, "M") and is_char(grid, br, "S"))
+            or (is_char(grid, ul, "S") and is_char(grid, br, "M"))
+        )
+        and (
+            (is_char(grid, bl, "M") and is_char(grid, ur, "S"))
+            or (is_char(grid, bl, "S") and is_char(grid, ur, "M"))
+        )
+    )
 
 
 def find_word_count(
@@ -57,8 +72,19 @@ def find_word_count(
     return count
 
 
+def find_xmas_count(grid: Grid):
+    assert len(grid) > 0
+    assert len(grid[0]) > 0
+    count = 0
+    for x, y in itertools.product(range(len(grid)), range(len(grid[0]))):
+        if is_x_mas(grid, V2(x, y)):
+            count += 1
+    return count
+
+
 grid = []
 with open("data/day4.txt") as f:
     grid = [line.strip() for line in f]
 
 find_word_count("XMAS", grid)
+print(find_xmas_count(grid))
