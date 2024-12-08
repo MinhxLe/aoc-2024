@@ -1,4 +1,3 @@
-from os import WCOREDUMP
 from typing import List
 from dataclasses import dataclass
 import itertools
