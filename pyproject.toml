@@ -8,6 +8,7 @@ dependencies = []
 
 [dependency-groups]
 dev = [
+    "ipdb>=0.13.13",
     "ipython>=8.30.0",
     "ruff>=0.8.2",
 ]
