@@ -27,6 +27,7 @@ def find_valid_equation(
         sub_equation := find_valid_equation(target // numbers[-1], numbers[:-1])
     ) is not None:
         sub_equation.append("*")
+    # for part 2
     else:
         number_str = str(numbers[-1])
         target_str = str(target)

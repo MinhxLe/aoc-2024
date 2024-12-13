@@ -1,6 +1,6 @@
 from enum import StrEnum
-from typing import List, Literal, Tuple
-from dataclasses import dataclass
+from typing import Tuple
+from utils import V2, Grid
 
 
 class Direction(StrEnum):
@@ -12,15 +12,6 @@ class Direction(StrEnum):
     @classmethod
     def all(cls):
         return [x for x in cls]
-
-
-@dataclass(frozen=True)
-class V2:
-    x: int
-    y: int
-
-    def __add__(self, that: "V2") -> "V2":
-        return V2(self.x + that.x, self.y + that.y)
 
 
 def rotate(direction: Direction) -> Direction:
@@ -35,9 +26,6 @@ def rotate(direction: Direction) -> Direction:
             return Direction.DOWN
         case _:
             raise ValueError
-
-
-Grid = List[str]
 
 
 def in_bounds(position: V2, grid: Grid) -> bool:

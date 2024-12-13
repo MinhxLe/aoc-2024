@@ -1,18 +1,8 @@
 from typing import List
-from dataclasses import dataclass
 import itertools
-
+from utils import V2
 
 Grid = List[str]
-
-
-@dataclass
-class V2:
-    x: int
-    y: int
-
-    def __add__(self, that: "V2") -> "V2":
-        return V2(self.x + that.x, self.y + that.y)
 
 
 def is_char(grid: Grid, position: V2, c: str) -> bool:
