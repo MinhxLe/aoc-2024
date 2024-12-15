@@ -78,7 +78,7 @@ class Problem:
         for i in range(len(self.map)):
             for j in range(len(self.map[0])):
                 if self.map[i][j] == "0":
-                    total += self.get_num_paths(V2(i, j)
+                    total += self.get_num_paths(V2(i, j))
         return total
 
 
