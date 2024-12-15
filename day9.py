@@ -134,6 +134,6 @@ files, spaces = parse_compact_format(test_compact)
 moved_files = move_files_2(files, spaces)
 print(compute_checksum(moved_files))
 
-files, spaces = parse_compact_format(compact)
+files, spaces = parse_compact_format(full_compact)
 moved_files = move_files_2(files, spaces)
 print(compute_checksum(moved_files))
