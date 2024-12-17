@@ -1,8 +1,4 @@
 from dataclasses import dataclass
-from typing import List
-
-
-Grid = List[str]
 
 
 @dataclass(frozen=True)
@@ -26,6 +22,33 @@ class Direction:
     LEFT = V2(0, -1)
     RIGHT = V2(0, 1)
 
+    ALL = [DOWN, UP, LEFT, RIGHT]
+
+
+class Grid(list[str]):
+    def __post_init__(self) -> None:
+        assert len(self) > 0
+        # TODO assert all the  str length are the same
+
+    @property
+    def height(self) -> int:
+        return len(self)
+
+    @property
+    def width(self) -> int:
+        return len(self[0])
+
+    def is_inbounds(self, position: V2) -> bool:
+        return 0 <= position.x < self.height and 0 <= position.y < self.width
+
+    def at(self, position: V2) -> str:
+        return self[position.x][position.y]
+
 
 def is_inbounds(position: V2, grid: Grid) -> bool:
-    return 0 <= position.x < len(grid) and 0 <= position.y < len(grid[1])
+    return 0 <= position.x < len(grid) and 0 <= position.y < len(grid[0])
+
+
+def read_grid(fname) -> Grid:
+    with open(fname) as f:
+        return Grid([x.strip() for x in f])
