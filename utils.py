@@ -15,6 +15,14 @@ class V2:
     def __neg__(self) -> "V2":
         return V2(-self.x, -self.y)
 
+    def __mul__(self, that) -> "V2":
+        if isinstance(that, int):
+            return V2(self.x * that, self.y * that)
+        raise NotImplementedError
+
+    def __rmul__(self, that) -> "V2":
+        return self * that
+
 
 class Direction:
     DOWN = V2(1, 0)
