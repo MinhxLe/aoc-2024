@@ -1,5 +1,5 @@
 from typing import Tuple
-from utils import Grid, V2, is_inbounds, Direction
+from utils import Grid2, V2, is_inbounds, Direction
 import string
 import functools
 from dataclasses import dataclass

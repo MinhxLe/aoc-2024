@@ -1,5 +1,5 @@
 from collections import Counter
-from utils import Grid, Direction, V2, read_grid
+from utils import Grid2, Direction, V2, read_grid
 from dataclasses import dataclass
 
 
@@ -30,7 +30,7 @@ class Side:
 class Region:
     label: str
     positions: set[V2]
-    grid: Grid
+    grid: Grid2
 
     def get_area(self) -> int:
         return len(self.positions)
@@ -80,7 +80,7 @@ class Region:
         return merged_sides
 
 
-def get_region(position: V2, grid: Grid) -> Region:
+def get_region(position: V2, grid: Grid2) -> Region:
     label = grid.at(position)
     region = {position}
     queue = [position]
@@ -98,7 +98,7 @@ def get_region(position: V2, grid: Grid) -> Region:
     return Region(label, region, grid)
 
 
-def get_regions(grid: Grid) -> list[Region]:
+def get_regions(grid: Grid2) -> list[Region]:
     visited = set()
     regions = []
     for i in range(grid.height):
@@ -111,7 +111,7 @@ def get_regions(grid: Grid) -> list[Region]:
     return regions
 
 
-def solve_part_1(map: Grid) -> int:
+def solve_part_1(map: Grid2) -> int:
     regions = get_regions(map)
     total = 0
     for region in regions:
@@ -119,7 +119,7 @@ def solve_part_1(map: Grid) -> int:
     return total
 
 
-def solve_part_2(map: Grid) -> int:
+def solve_part_2(map: Grid2) -> int:
     regions = get_regions(map)
     total = 0
     for region in regions:
@@ -127,7 +127,7 @@ def solve_part_2(map: Grid) -> int:
     return total
 
 
-test_map = Grid(
+test_map = Grid2(
     [
         "RRRRIICCFF",
         "RRRRIICCCF",
