@@ -40,3 +40,4 @@ def calculate_similarity_score(
 ids1, ids2 = get_ids()
 print(calculate_total_distance(ids1, ids2))
 print(calculate_similarity_score(ids1, ids2))
+print("Hello, World!")

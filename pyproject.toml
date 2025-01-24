@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "networkx>=3.4.2",
+    "ipdb>=0.13.13",
 ]
 
 [dependency-groups]

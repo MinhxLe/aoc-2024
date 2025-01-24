@@ -3,7 +3,6 @@ import functools
 from typing import Tuple
 import re
 
-
 @dataclass(frozen=True)
 class PageRule:
     n1: int
