@@ -74,6 +74,9 @@ class DirectionEnum(Enum):
 
 
 class Grid(list[str]):
+    def pprint(self):
+        print("\n".join(self))
+
     def __post_init__(self) -> None:
         assert len(self) > 0
         # TODO assert all the  str length are the same
