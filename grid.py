@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto
+from typing import Callable, Generic, TypeVar
 
 
 @dataclass(frozen=True)
@@ -110,6 +111,51 @@ class Grid(list[str]):
         return ps
 
 
+ElmT = TypeVar("ElmT")
+
+
+class GridV2(Generic[ElmT], list[list[ElmT]]):
+    def __post_init__(self) -> None:
+        assert len(self) > 0
+        # TODO assert all the  str length are the same
+
+    @property
+    def height(self) -> int:
+        return len(self)
+
+    @property
+    def width(self) -> int:
+        return len(self[0])
+
+    def is_inbounds(self, position: V2) -> bool:
+        return 0 <= position.x < self.height and 0 <= position.y < self.width
+
+    def update(self, p: V2, s: ElmT) -> None:
+        assert self.is_inbounds(p)
+        self[p.x][p.y] = s
+
+    def at(self, position: V2) -> ElmT:
+        return self[position.x][position.y]
+
+    def find(self, target: str) -> list[V2]:
+        ps = []
+        for i in range(self.height):
+            for j in range(self.width):
+                p = V2(i, j)
+                if self.at(p) == target:
+                    ps.append(p)
+        return ps
+
+    @classmethod
+    def fill(
+        cls,
+        e: ElmT,
+        height: int,
+        width: int,
+    ) -> "GridV2[ElmT]":
+        return GridV2([[e for _ in range(width)] for _ in range(height)])
+
+
 def is_inbounds(position: V2, grid: Grid) -> bool:
     return 0 <= position.x < len(grid) and 0 <= position.y < len(grid[0])
 
@@ -117,3 +163,8 @@ def is_inbounds(position: V2, grid: Grid) -> bool:
 def read_grid(fname) -> Grid:
     with open(fname) as f:
         return Grid([x.strip() for x in f])
+
+
+def read_grid_v2(fname, map_fn: Callable[[str], ElmT] = lambda c: c) -> GridV2[ElmT]:
+    with open(fname) as f:
+        return GridV2([[map_fn(c) for c in x.strip()] for x in f])
