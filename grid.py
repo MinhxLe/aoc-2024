@@ -47,13 +47,13 @@ class DirectionEnum(Enum):
     def to_v2(self) -> V2:
         match self:
             case DirectionEnum.NORTH:
-                return V2(-1, 0)
-            case DirectionEnum.SOUTH:
-                return V2(1, 0)
-            case DirectionEnum.EAST:
                 return V2(0, 1)
-            case DirectionEnum.WEST:
+            case DirectionEnum.SOUTH:
                 return V2(0, -1)
+            case DirectionEnum.EAST:
+                return V2(1, 0)
+            case DirectionEnum.WEST:
+                return V2(-1, 0)
             case _:
                 raise ValueError
 

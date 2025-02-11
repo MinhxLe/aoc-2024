@@ -13,7 +13,6 @@ MAX_GRID = 1_000
 class Instruction:
     direction: DirectionEnum
     n_steps: int
-    color: str
 
 
 def create_trench_boundary(
@@ -84,14 +83,13 @@ def save_trench_img(trench):
 def parse_instructions(fname) -> list[Instruction]:
     instructions = []
     with open(fname) as f:
-        pattern = r"(\w) (\d+) \((#.*)\)"
+        pattern = r"(\w) (\d+) \(#.*\)"
         for line in f:
             match = re.match(pattern, line)
             assert match is not None
-            direction_str, n_step_str, color_str = match.groups()
+            direction_str, n_step_str  = match.groups()
             instructions.append(
                 Instruction(
-                    color=color_str,
                     n_steps=int(n_step_str),
                     direction=dict(
                         R=DirectionEnum.EAST,
@@ -104,88 +102,33 @@ def parse_instructions(fname) -> list[Instruction]:
     return instructions
 
 
-def get_interior_vertices(instructions: list[Instruction]) -> list[V2]:
-    # we are digging a trench starting with a whole at 0, 0
-    # we can think of it as 4 points on cartesian coordinates. only 1 of these points will
-    # eventually reconnect. That set of vertices is the interior boundary of the polygon
-    vertices = [V2(0, 0)]
-    for instruction in instructions:
-        vertices.append(
-            vertices[-1] + (instruction.n_steps * instruction.direction.to_v2())
-        )
-    assert vertices[0] == vertices[-1]
-    return vertices[:-1]
-
-
-def get_boundary_vertices(instructions: list[Instruction]) -> list[V2]:
-    vertices = [V2(0, 0)]
-    for instruction in instructions:
-        vertices.append(
-            vertices[-1] + (instruction.n_steps * instruction.direction.to_v2())
-        )
-    assert vertices[0] == vertices[-1]
-    vertices = vertices[:-1]
-    return vertices
-
-
-def is_above(p1: V2, p2: V2) -> bool:
-    return p1.x == p2.x and p1.y > p2.y
-
-
-def is_below(p1: V2, p2: V2) -> bool:
-    return p1.x == p2.x and p1.y < p2.y
-
-
-def is_right(p1: V2, p2: V2) -> bool:
-    return p1.y == p2.y and p1.x > p2.x
-
-
-def is_left(p1: V2, p2: V2) -> bool:
-    return p1.y == p2.y and p1.x < p2.x
-
-
-def is_adjacent(p1: V2, p2: V2) -> bool:
-    return is_left(p1, p2) or is_right(p1, p2) or is_below(p1, p2) or is_above(p1, p2)
-
-
-def compute_dv(p: V2, prev_p: V2, next_p: V2) -> V2:
-    if is_above(prev_p, p) and is_right(next_p, p):
-        dx, dy = -1, -1
-    elif is_above(next_p, p) and is_right(prev_p, p):
-        dx, dy = 1, 1
-    elif is_below(prev_p, p) and is_right(next_p, p):
-        dx, dy = 1, -1
-    elif is_below(next_p, p) and is_right(prev_p, p):
-        dx, dy = -1, 1
-    elif is_left(prev_p, p) and is_below(next_p, p):
-        dx, dy = -1, -1
-    elif is_left(next_p, p) and is_below(prev_p, p):
-        dx, dy = 1, 1
-    elif is_left(prev_p, p) and is_above(next_p, p):
-        dx, dy = 1, -1
-    elif is_left(next_p, p) and is_above(prev_p, p):
-        dx, dy = -1, 1
-    else:
-        raise ValueError
-    return V2(dx, dy)
-
-
-def get_edge_vertices(boundary_vertices: list[V2]) -> Tuple[list[V2], list[V2]]:
-    evs1 = []
-    evs2 = []
-    n = len(boundary_vertices)
-    for i in range(n):
-        tv = boundary_vertices[i]
-        prev_tv = boundary_vertices[(i - 1) % n]
-        next_tv = boundary_vertices[(i + 1) % n]
-
-        dv = compute_dv(tv, prev_tv, next_tv)
-        ev1 = tv + dv
-        ev2 = tv - dv
-        evs1.append(ev1)
-        evs2.append(ev2)
-
-    return evs1, evs2
+def parse_instructions_2(fname) -> list[Instruction]:
+    instructions = []
+    with open(fname) as f:
+        pattern = r"\w \d+ \((#.*)\)"
+        for line in f:
+            match = re.match(pattern, line)
+            assert match is not None
+            hex_str = match.groups()
+            n_steps = ...
+            direction = dict(
+                0=DirectionEnum.EAST,
+                1=DirectionEnum.SOUTH,
+                2=DirectionEnum.WEST,
+                3=DirectionEnum.NORTH,
+            )[hex_str[-1]]
+            instructions.append(
+                Instruction(
+                    n_steps=int(n_step_str),
+                    direction=dict(
+                        R=DirectionEnum.EAST,
+                        L=DirectionEnum.WEST,
+                        U=DirectionEnum.NORTH,
+                        D=DirectionEnum.SOUTH,
+                    )[direction_str],
+                )
+            )
+    return instructions
 
 
 def draw_polygon(vs: list[V2]):
@@ -201,7 +144,7 @@ def draw_polygon(vs: list[V2]):
     plt.savefig("/tmp/polygon.png")
 
 
-def compute_interior_area(vertices: list[V2]) -> int:
+def compute_area(vertices: list[V2]) -> int:
     # shoelace formula, trapezoid formula
     area = 0
     n = len(vertices)
@@ -212,35 +155,53 @@ def compute_interior_area(vertices: list[V2]) -> int:
     return abs(area)
 
 
-def compute_boundary_area(vertices: list[V2]) -> int:
-    # shoelace formula, trapezoid formula
-    area = 0
-    n = len(vertices)
-    for i in range(n):
-        p = vertices[i]
-        next_p = vertices[(i + 1) % n]
-        if p.x == next_p.x:
-            assert p.y != next_p.y
-            area += abs(p.y - next_p.y)
-        elif p.y == next_p.y:
-            assert p.x != next_p.x
-            area += abs(p.x - next_p.x)
+def is_left(p1: V2, p2: V2, orrientation: DirectionEnum) -> bool:
+    match orrientation:
+        case DirectionEnum.NORTH:
+            return p1.x < p2.x
+        case DirectionEnum.SOUTH:
+            return p1.x > p2.x
+        case DirectionEnum.EAST:
+            return p1.y > p2.y
+        case DirectionEnum.WEST:
+            return p1.y < p2.y
+    raise ValueError
+
+
+def get_boundary_vertices(instructions: list[Instruction]) -> Tuple[list[V2], list[V2]]:
+    # The initial points of the front digger if it was facing north
+    # we want p2 to be left of p1
+    orrientation = instructions[0].direction
+    right_p = V2(0, 0)
+    left_p = right_p + orrientation.counter_clockwise().to_v2()
+    assert is_left(left_p, right_p, orrientation)
+    vs1, vs2 = [right_p], [left_p]
+    for i, instruction in enumerate(instructions):
+        orrientation = instruction.direction
+        assert is_left(left_p, right_p, orrientation)
+        next_instruction = instructions[(i + 1) % len(instructions)]
+        right_p += instruction.n_steps * orrientation.to_v2()
+        left_p += instruction.n_steps * orrientation.to_v2()
+        # turn right next
+        if orrientation.clockwise() == next_instruction.direction:
+            vs2.append(left_p)
+            left_p += orrientation.clockwise().to_v2()
+            right_p -= orrientation.to_v2()
+            vs1.append(right_p)
+        # turn left next
+        elif orrientation.counter_clockwise() == next_instruction.direction:
+            vs1.append(right_p)
+            right_p += orrientation.counter_clockwise().to_v2()
+            left_p -= orrientation.to_v2()
+            vs2.append(left_p)
         else:
-            raise ValueError
-    return area
+            raise ValueError()
+
+    return vs1, vs2
 
 
 if __name__ == "__main__":
-    fname = "y2023/data/d18_small.txt"
-    # fname = "y2023/data/d18.txt"
+    # fname = "y2023/data/d18_small.txt"
+    fname = "y2023/data/d18.txt"
     instructions = parse_instructions(fname)
-    boundary_vs = get_boundary_vertices(instructions)
-    evs1, evs2 = get_edge_vertices(boundary_vs)
-
-    n = len(boundary_vs)
-    for i in range(n):
-        v = boundary_vs[i]
-        prev_v = boundary_vs[(i - 1) % n]
-        next_v = boundary_vs[(i + 1) % n]
-        if not is_adjacent(v, prev_v) or not is_adjacent(v, next_v):
-            print(i, v)
+    vs1, vs2 = get_boundary_vertices(instructions)
